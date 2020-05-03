@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:bubble/bubble.dart';
 import 'package:flutter/foundation.dart';
 import 'package:morse/db/database-helper.dart';
@@ -28,6 +30,7 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
   static int pageSize = 10;
   List<FieldsMensagem> mensagemList = new List();
   FieldsMensagem fieldsMensagem = FieldsMensagem();
+  Mensagem mensagem = Mensagem();
 
   @override
   void initState() {
@@ -95,24 +98,22 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
     return Flexible(
       child: StreamBuilder(
         stream: widget.channel.stream,
-        builder: (context, snapshot) {
+        builder: (context, AsyncSnapshot snapshot) {
           if (snapshot.hasData) {
-            
+            var responseSnap = json.decode(snapshot.data);
+            print(responseSnap['payload']['fields']);
+            _insertMsg(responseSnap['payload']['fields']);
           }
           if (snapshot.hasError) {
             print('Aconteceu algun erro no socket');
           }
           return chatListMsg(context);
-          // return Padding(
-          //   padding: const EdgeInsets.symmetric(vertical: 24.0),
-          //   child: Text(snapshot.hasData ? '${snapshot.data}' : ''),
-          // );
         },
       )
     );
   }
 
-  Widget _itemPublicadosBuilder(context, items) {
+  Widget _itemPublicadosBuilder(context, index) {
 
     double pixelRatio = MediaQuery.of(context).devicePixelRatio;
     double px = 1 / pixelRatio;
@@ -146,7 +147,7 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
             },
             child: Bubble(
               style: styleMe,
-              child: Text('dados ',
+              child: Text('${mensagemList[index].menMensagem} ',
                 style: TextStyle(
                   fontSize: 16.0,
                   color: Colors.white,
@@ -229,10 +230,7 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
       fieldsMensagem.menDatacriacao = '${DateTime.now()}';
       fieldsMensagem.menDest = 1;
       fieldsMensagem.menFrom = 1;
-      var result = await db.insertMensagem(fieldsMensagem);
-      // if(result != 0){
-      //   _getMoreData(1);
-      // }
+      await db.insertMensagem(fieldsMensagem);
       textEditingController.text = '';
     }
   }
@@ -241,6 +239,17 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
   void dispose() {
     widget.channel.sink.close();
     super.dispose();
+  }
+
+  Future<void> _insertMsg(fieldsMensagem) async {
+    DatabaseHelper db = DatabaseHelper.instance;
+    var fieldMsg = FieldsMensagem.fromJson(fieldsMensagem);
+    // fieldsMensagem.menMensagem = textEditingController.text;
+    // fieldsMensagem.menDatacriacao = '${DateTime.now()}';
+    // fieldsMensagem.menDest = 1;
+    // fieldsMensagem.menFrom = 1;
+    var result = await db.insertMensagem(fieldMsg);
+    print('Suecesso ao inserir');
   }
 
   void _getMoreData(int index) async {
