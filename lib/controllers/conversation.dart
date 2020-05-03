@@ -1,44 +1,7 @@
-import 'package:morse/db/database-helper.dart';
-import 'package:morse/models/mensagem.dart';
 import 'package:morse/services/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ProprietarioConversations{
-
-  // Future<MensagemPaginator> list(limit, offset, imovel, imobiliaria) async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   Services servicesApi = new Services(prefs.getString('sessionid'));
-
-  //   var params = {
-  //     'limit': '${limit}',
-  //     'page': '${offset == 0 ? 1 : offset}',
-  //     'imobiliaria': '${imobiliaria}',
-  //     'imovel': '${imovel}'
-  //   };
-  //   var responseBody = await servicesApi.callAPI('get', 'api/proprietario/mensagem/', params);
-
-  //   if (responseBody['status_api'] == true) {
-  //     return MensagemPaginator.fromJson(responseBody);
-  //   }else{
-  //     return null;
-  //   } 
-  // }
-
-  // Future<List<MessagesList>> listConversations(limit, offset) async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   Services servicesApi = new Services(prefs.getString('sessionid'));
-
-  //   var params = {
-  //     'limit': '${limit}',
-  //     'page': '${offset == 0 ? 1 : offset}'
-  //   };
-
-  //   print('Chamando vc como registro');
-  //   var responseBody = await servicesApi.callAPI('get', 'api/proprietario/listmensagens/', params);
-  //   return MessagesList.fromJsonList(responseBody['mensagens']);
-  // }
-
-
+class Conversations{
   Future<bool> sendmessages(params) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     Services servicesApi = new Services(prefs.getString('sessionid'));

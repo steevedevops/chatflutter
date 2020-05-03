@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:bubble/bubble.dart';
 import 'package:flutter/foundation.dart';
+import 'package:morse/controllers/conversation.dart';
 import 'package:morse/db/database-helper.dart';
 import 'package:morse/models/mensagem.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -16,19 +18,27 @@ class ChatConversationsScreen extends StatefulWidget {
       : super(key: key);
 
   @override
-  _ChatConversationsScreenState createState() => _ChatConversationsScreenState();
+  _ChatConversationsScreenState createState() => _ChatConversationsScreenState(channel: channel);
 }
 
 class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
   TextEditingController _controller = TextEditingController();
-
+  final WebSocketChannel channel;
   final TextEditingController textEditingController = new TextEditingController();
+  List<FieldsMensagem> mensagemList = new List();
+
+  // Fica escutando o canal por aqui
+  _ChatConversationsScreenState({this.channel}) {
+    channel.stream.listen((data) {
+      var responseSnap = json.decode(data);
+      _insertMsg(responseSnap['payload']['fields']);
+    });
+  }
   
   ScrollController _sc = new ScrollController();
   int pageIndex = 1;
   bool isLoading = false;
   static int pageSize = 10;
-  List<FieldsMensagem> mensagemList = new List();
   FieldsMensagem fieldsMensagem = FieldsMensagem();
   Mensagem mensagem = Mensagem();
 
@@ -41,6 +51,12 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
       }
     });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.channel.sink.close();
+    super.dispose();
   }
 
 
@@ -64,15 +80,14 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
   Widget chatListMsg(BuildContext context) {
     return ListView.builder(
       reverse: true,
-      itemCount: mensagemList.length + 1,
+      itemCount: mensagemList.length,
       padding: EdgeInsets.symmetric(vertical: 8.0),
       itemBuilder: (BuildContext context, int index) {
-
         if (index == mensagemList.length) {
           return _buildProgressIndicator();
         } else {
           return Padding(
-            padding: EdgeInsets.only(left:10),
+            padding: EdgeInsets.only(left:5, right: 5),
             child: _itemPublicadosBuilder(context, index),
           );
         }
@@ -96,20 +111,7 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
 
   Widget chatList(BuildContext context) {
     return Flexible(
-      child: StreamBuilder(
-        stream: widget.channel.stream,
-        builder: (context, AsyncSnapshot snapshot) {
-          if (snapshot.hasData) {
-            var responseSnap = json.decode(snapshot.data);
-            print(responseSnap['payload']['fields']);
-            _insertMsg(responseSnap['payload']['fields']);
-          }
-          if (snapshot.hasError) {
-            print('Aconteceu algun erro no socket');
-          }
-          return chatListMsg(context);
-        },
-      )
+      child:chatListMsg(context)
     );
   }
 
@@ -124,8 +126,8 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
       elevation: 1 * px,
       radius: Radius.circular(15.0),
       padding: BubbleEdges.all(14),
-      margin: BubbleEdges.only(top: 8.0, right: 50.0, left: 10),
-      // alignment: Alignment.topLeft,
+      margin: BubbleEdges.only(top: 8.0, right: 50.0, left: 0),
+      alignment: Alignment.topLeft,
     );
 
     BubbleStyle styleMe = BubbleStyle(
@@ -134,31 +136,55 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
       color: Theme.of(context).primaryColor,
       elevation: 1 * px,
       padding: BubbleEdges.all(14),
-      margin: BubbleEdges.only(top: 8.0, left: 50.0, right: 5),
-      // alignment: Alignment.topRight,
+      margin: BubbleEdges.only(top: 8.0, left: 50.0, right: 0),
+      alignment: Alignment.topRight,
     );
 
-    return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: <Widget>[
-          GestureDetector(
-            onTap: () async {
-            },
-            child: Bubble(
-              style: styleMe,
-              child: Text('${mensagemList[index].menMensagem} ',
-                style: TextStyle(
-                  fontSize: 16.0,
-                  color: Colors.white,
-                  fontStyle: FontStyle.normal)
+    if(mensagemList[index].menDest == 3){
+      return Container(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: <Widget>[
+            GestureDetector(
+              onTap: () async {
+              },
+              child: Bubble(
+                style: styleSomebody,
+                child: Text('${mensagemList[index].menMensagem} ',
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Theme.of(context).primaryColor,
+                    fontStyle: FontStyle.normal)
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-      margin: EdgeInsets.only(bottom: 0.0),
-    );
+          ],
+        ),
+        margin: EdgeInsets.only(bottom: 0.0),
+      );
+    }else{
+      return Container(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: <Widget>[
+            GestureDetector(
+              onTap: () async {
+              },
+              child: Bubble(
+                style: styleMe,
+                child: Text('${mensagemList[index].menMensagem} ',
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.white,
+                    fontStyle: FontStyle.normal)
+                ),
+              ),
+            ),
+          ],
+        ),
+        margin: EdgeInsets.only(bottom: 0.0),
+      );
+    }
   }
 
   Widget inputBar(BuildContext context) {
@@ -166,6 +192,16 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
         padding: EdgeInsets.all(8.0),
         child: Row(
           children: <Widget>[
+            SizedBox(
+              width: 5.0,
+            ),
+            GestureDetector(
+              onTap: () async {
+                DatabaseHelper db = DatabaseHelper.instance;
+                await db.deleteallMensagem();
+                _getMoreData(1);
+              },
+            child: Container(child: Icon(Icons.delete),),),
             SizedBox(
               width: 5.0,
             ),
@@ -224,55 +260,65 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
 
   void _sendMessage() async {
     DatabaseHelper db = DatabaseHelper.instance;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
     if (textEditingController.text.isNotEmpty) {
-      fieldsMensagem.menMensagem = textEditingController.text;
-      fieldsMensagem.menDatacriacao = '${DateTime.now()}';
-      fieldsMensagem.menDest = 1;
-      fieldsMensagem.menFrom = 1;
-      await db.insertMensagem(fieldsMensagem);
+      var jsonMsgLocal = {
+        "men_mensagem": textEditingController.text,
+        "men_datacriacao" : '${DateTime.now()}',
+        "men_datalido": null,
+        "men_dataalterado": null,
+        "men_from": 3,
+        "men_dest": 2
+      };
+
+      var jsonMsgWeb = {
+          "model": "mensagem.mensagem",
+          "fields": {
+              "men_mensagem": textEditingController.text,
+              "men_dest": 2
+          }
+      };
+      await Conversations().sendmessages(jsonMsgWeb);
+      await _insertMsg(jsonMsgLocal);
       textEditingController.text = '';
     }
   }
-
-  @override
-  void dispose() {
-    widget.channel.sink.close();
-    super.dispose();
-  }
-
+  
   Future<void> _insertMsg(fieldsMensagem) async {
     DatabaseHelper db = DatabaseHelper.instance;
     var fieldMsg = FieldsMensagem.fromJson(fieldsMensagem);
-    // fieldsMensagem.menMensagem = textEditingController.text;
-    // fieldsMensagem.menDatacriacao = '${DateTime.now()}';
-    // fieldsMensagem.menDest = 1;
-    // fieldsMensagem.menFrom = 1;
-    var result = await db.insertMensagem(fieldMsg);
-    print('Suecesso ao inserir');
+    var result =  await db.insertMensagem(fieldMsg);
+    if(result != 0){
+      _getLastmessages();
+    }
   }
 
   void _getMoreData(int index) async {
-
-    print(index);
     DatabaseHelper db = DatabaseHelper.instance;
     if (!isLoading) {
-
       setState(() {
         isLoading = true;
       });
 
-      var mensagemPaginator = await db.getMensagemlist();
+      var mensagemPaginator = await db.getMensagemlist(10, 0);
 
       for (var i = 0; i < mensagemPaginator.length; i++) {
         mensagemList.add(mensagemPaginator[i]);
       }
 
-      
       setState(() {
         isLoading = false;
         pageIndex++;
       });
     }
+  }
+
+  void _getLastmessages() async {
+    DatabaseHelper db = DatabaseHelper.instance;
+    var lastMensagem = await db.getLastmessages();
+    setState(() {
+      mensagemList.insert(0, lastMensagem);
+    });
   }
 }

@@ -49,22 +49,43 @@ class DatabaseHelper {
     return result;
   }
 
-  Future<List<FieldsMensagem>> getMensagemlist() async {
+  Future<List<FieldsMensagem>> getMensagemlist(int limit, int offset) async {
     Database db = await instance.database;
     List<FieldsMensagem> mensagemList = List();
-    var imagen = await db.rawQuery(''' SELECT * FROM mensagem ''');
+    var imagen = await db.rawQuery(''' SELECT * FROM mensagem order by men_id desc limit ? OFFSET ? ''', [limit, offset]);
     for (Map res in imagen) {
       mensagemList.add(FieldsMensagem.fromJson(res));
     }
     return mensagemList;
   }
 
-  // Future<int> deletefotosbyid(int id) async {
-  //   Database db = await this.database;
-  //   int result = await db
-  //       .rawDelete('DELETE FROM imovel_fotos where img_id = ?' ,[id]);
-  //   return result;
+  // Future<List<FieldsMensagem>> getLastmessages() async {
+  //   Database db = await instance.database;
+  //   List<FieldsMensagem> mensagemList = List();
+  //   var imagen = await db.rawQuery(''' SELECT * FROM mensagem order by men_id desc limit 1 ''');
+  //   for (Map res in imagen) {
+  //     mensagemList.add(FieldsMensagem.fromJson(res));
+  //   }
+  //   return mensagemList;
   // }
+
+  Future<FieldsMensagem> getLastmessages() async {
+    Database db = await instance.database;
+    var result = await db.rawQuery(''' SELECT * FROM mensagem order by men_id desc limit 1 ''');
+    if (result.length > 0) {
+      return FieldsMensagem.fromJson(result.first);
+    } else {
+      FieldsMensagem fieldsMensagem = FieldsMensagem();
+      return fieldsMensagem;
+    }
+  }
+
+  Future<int> deleteallMensagem() async {
+    Database db = await this.database;
+    int result = await db
+        .rawDelete('DELETE FROM mensagem');
+    return result;
+  }
 
   // Future<int> deletefotos() async {
   //   Database db = await this.database;
