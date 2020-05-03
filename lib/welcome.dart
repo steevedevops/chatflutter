@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:morse/screens/chats/authenticate/login.dart';
 import 'package:morse/screens/home-screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WelcomeScreen extends StatefulWidget {
   @override
@@ -28,8 +30,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   void _nextScreen() async {
     Future.delayed(
       Duration(seconds: 3),
-      () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
+      () async {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        print('Ten session id');
+        print(prefs.getString('sessionid'));
+        if(prefs.getString('sessionid') != null){
+          Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
+        }else{
+          Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+        }
       }
     );
   }

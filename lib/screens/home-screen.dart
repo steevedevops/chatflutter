@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:morse/screens/chats/chats-conversations.dart';
 import 'package:morse/screens/conversations-screen.dart';
 import 'package:morse/screens/settings-screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/io.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -59,17 +60,18 @@ class _HomeScreenState extends State<HomeScreen> {
               elevation: 7.0,
               child: new Icon(Icons.add_comment),
               backgroundColor: Theme.of(context).primaryColor,
-              onPressed: () {
+              onPressed: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                print(prefs.getString('sessionid'));
                 Navigator.push(context, MaterialPageRoute(builder: (context) => 
                 ChatConversationsScreen(
                   title: 'Welcome dados',
                   channel: IOWebSocketChannel.connect('ws://186.207.238.21:8006/ws/mensagem/steeve', 
                     headers: {
-                      'Cookie': 'sessionid=8gw1off3j5p0puts6d1aa3kuvcw65a3i',
+                      'Cookie': 'sessionid=${prefs.getString('sessionid')}',
                     }
                   ),
                 ),
-                
                 ));
               }),
           bottomNavigationBar: ClipRRect(
