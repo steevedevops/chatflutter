@@ -36,6 +36,7 @@ flutter:
   uses-material-design: true
   assets:
     - lib/assets/images/bg-building.jpg
+    - lib/assets/images/bg-chat.jpg
     - lib/assets/images/login.svg
 
   # example:

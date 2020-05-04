@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:morse/screens/chats/authenticate/login.dart';
+import 'package:morse/screens/authenticate/login.dart';
 import 'package:morse/screens/home-screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

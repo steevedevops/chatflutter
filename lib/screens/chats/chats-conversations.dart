@@ -63,10 +63,21 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // backgroundColor: Color(0xFFf0f0f0),
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Stack(children: <Widget>[
+      body:  new Container(
+        decoration: BoxDecoration(
+          color: Color(0xFFf0f0f0),
+          image: DecorationImage(
+            colorFilter: new ColorFilter.mode(
+                Colors.black.withOpacity(0.09), BlendMode.dstATop),
+            image: AssetImage('lib/assets/images/bg-chat.jpg'),
+            fit: BoxFit.cover,
+          ),
+        ),
+      child: Stack(children: <Widget>[
         Column(
           children: <Widget>[
             chatList(context),
@@ -74,7 +85,7 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
           ],
         ),
       ])
-    );
+    ));
   }
 
   Widget chatListMsg(BuildContext context) {
@@ -191,7 +202,7 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
       );
     }else{
       return Container(
-        padding: EdgeInsets.only(right: 5),
+        padding: EdgeInsets.only(right: 0),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.end,
@@ -219,8 +230,8 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
                   Center(
                     child: Text('19:20',style: TextStyle(
                         fontSize: 10.0,
-                        // color: Theme.of(context).primaryColor,
-                        color: Colors.black45,
+                        color: Theme.of(context).primaryColor,
+                        // color: Colors.black45,
                         fontStyle: FontStyle.normal))),
                   SizedBox(height: 2,),
                   Center(
@@ -246,16 +257,16 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
             SizedBox(
               width: 5.0,
             ),
-            GestureDetector(
-              onTap: () async {
-                DatabaseHelper db = DatabaseHelper.instance;
-                await db.deleteallMensagem();
-                _getMoreData(1);
-              },
-              child: Container(child: Icon(Icons.delete, color: Theme.of(context).primaryColor,),),),
-              SizedBox(
-                width: 5.0,
-              ),
+            // GestureDetector(
+            //   onTap: () async {
+            //     DatabaseHelper db = DatabaseHelper.instance;
+            //     await db.deleteallMensagem();
+            //     _getMoreData(1);
+            //   },
+            //   child: Container(child: Icon(Icons.delete, color: Theme.of(context).primaryColor,),),),
+            //   SizedBox(
+            //     width: 5.0,
+            //   ),
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(15.0),
@@ -302,7 +313,7 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
               // ),
             ),
             SizedBox(
-              width: 5.0,
+              width: 4.0,
             ),
           ],
         ),
