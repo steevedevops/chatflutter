@@ -142,9 +142,36 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
 
     if(mensagemList[index].menDest == 3){
       return Container(
-        child: Column(
+        padding: EdgeInsets.only(left: 5),
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
+            Container(
+              width: 30,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0)
+              ),
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black38,
+                      borderRadius: BorderRadius.circular(50.0)
+                    ),
+                    width: 30,
+                    height: 30,
+                    child: Text('')
+                  ),
+                  SizedBox(height: 5,),
+                  Center(
+                    child: Text('19:20',style: TextStyle(
+                        fontSize: 10.0,
+                        color: Theme.of(context).primaryColor,
+                        fontStyle: FontStyle.normal))),
+                    
+                ],
+              ) 
+            ),
             GestureDetector(
               onTap: () async {
               },
@@ -164,8 +191,10 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
       );
     }else{
       return Container(
-        child: Column(
+        padding: EdgeInsets.only(right: 5),
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             GestureDetector(
               onTap: () async {
@@ -179,6 +208,28 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
                     fontStyle: FontStyle.normal)
                 ),
               ),
+            ),
+            Container(
+              width: 30,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10.0)
+              ),
+              child: Column(
+                children: <Widget>[
+                  Center(
+                    child: Text('19:20',style: TextStyle(
+                        fontSize: 10.0,
+                        // color: Theme.of(context).primaryColor,
+                        color: Colors.black45,
+                        fontStyle: FontStyle.normal))),
+                  SizedBox(height: 2,),
+                  Center(
+                    child: Icon(Icons.check_circle, color: Theme.of(context).primaryColor, size: 18,)
+                    // child: Icon(Icons.check_circle_outline, color: Colors.black45, size: 18,)
+                  ),
+                  SizedBox(height: 5,),
+                ],
+              ) 
             ),
           ],
         ),
@@ -201,10 +252,10 @@ class _ChatConversationsScreenState extends State<ChatConversationsScreen> {
                 await db.deleteallMensagem();
                 _getMoreData(1);
               },
-            child: Container(child: Icon(Icons.delete),),),
-            SizedBox(
-              width: 5.0,
-            ),
+              child: Container(child: Icon(Icons.delete, color: Theme.of(context).primaryColor,),),),
+              SizedBox(
+                width: 5.0,
+              ),
             Expanded(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(15.0),
