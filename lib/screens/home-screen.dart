@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:morse/screens/chats/chats-conversations.dart';
 import 'package:morse/screens/conversations-screen.dart';
 import 'package:morse/screens/settings-screen.dart';
+import 'package:morse/widgets/sidebar/sidebar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -52,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           ),
-          drawer: Container(),
+          drawer: Sidebar(),
           body: _widgetOptions.elementAt(_selectedIndex),
           floatingActionButtonLocation:
               FloatingActionButtonLocation.centerDocked,
